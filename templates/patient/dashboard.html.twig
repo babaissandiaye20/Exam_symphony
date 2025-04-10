@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Clinique 221 - Dashboard Patient{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navigation {
+            border: 1px solid #4CAF50;
+            width: 80%;
+            margin: 30px auto;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .nav-button {
+            background-color: white;
+            border-top: 5px solid #4CAF50;
+            border-bottom: 5px solid #4CAF50;
+            padding: 10px 15px;
+            text-align: center;
+            color: #4CAF50;
+            font-size: 1.1em;
+            text-decoration: none;
+            flex: 1;
+            margin: 0;
+        }
+        
+        .nav-button.active {
+            background-color: #f0f8f0;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            padding: 20px;
+            margin: 0 auto;
+            width: 80%;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        
+        .btn-danger {
+            background-color: #f44336;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+        
+        .alert-warning {
+            color: #8a6d3b;
+            background-color: #fcf8e3;
+            border-color: #faebcc;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="header">
+        <div class="clinic-name">Clinique 221</div>
+        <div class="user-name">{{ app.user.nom ?? 'Utilisateur' }}</div>
+    </div>
+    
+    <div class="navigation">
+        <div class="nav-buttons">
+            <a href="{{ path('patient_list_rendezvous') }}" class="nav-button {% if app.request.get('_route') == 'patient_list_rendezvous' %}active{% endif %}">Mes RV</a>
+            <a href="{{ path('patient_list_consultations') }}" class="nav-button {% if app.request.get('_route') == 'patient_list_consultations' %}active{% endif %}">Mes cons</a>
+            <a href="{{ path('patient_list_prestations') }}" class="nav-button {% if app.request.get('_route') == 'patient_list_prestations' %}active{% endif %}">Mes Pres</a>
+{# Dans templates/patient/dashboard.html.twig, remplacez la ligne du bouton "Demande RV" par: #}
+<a href="{{ path('patient_demande_rendezvous') }}" class="nav-button {% if app.request.get('_route') == 'patient_demande_rendezvous' %}active{% endif %}">Demande RV</a>        </div>
+    </div>
+    
+    <div class="main-content">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
+        {% block content %}
+            {# Ce bloc sera surchargé par les templates enfants #}
+        {% endblock %}
+    </div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{# templates/clinic/dashboard.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Clinique 221 - Dashboard{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border: 1px solid #4CAF50;
+            margin: 0 auto;
+            width: 80%;
+        }
+        
+        .nav-button {
+            background-color: white;
+            border-top: 5px solid #4CAF50;
+            border-bottom: 5px solid #4CAF50;
+            padding: 15px 0;
+            width: 100%;
+            text-align: center;
+            color: #4CAF50;
+            font-size: 1.2em;
+            margin: 0 5px;
+        }
+        
+        .main-content {
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .clinic-name {
+            font-size: 2em;
+        }
+        
+        .user-name {
+            font-size: 1.5em;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="header">
+        <div class="clinic-name">Clinique 221</div>
+        <div class="user-name">Sidy</div>
+    </div>
+    
+    <div class="nav-buttons">
+        <div class="nav-button">Mes RV</div>
+        <div class="nav-button">Mes cons</div>
+        <div class="nav-button">Mes Pres</div>
+        <div class="nav-button">Demande RV</div>
+    </div>
+    
+    <div class="main-content">
+        {% block content %}
+            {# Le contenu de chaque section sera chargé ici dynamiquement #}
+        {% endblock %}
+    </div>
+{% endblock %}

@@ -1,0 +1,40 @@
+
+{# templates/patient/prestations.html.twig #}
+{% extends 'patient/dashboard.html.twig' %}
+
+{% block content %}
+    <h2>Mes Prestations</h2>
+    
+    {% if prestations is empty %}
+        <p>Vous n'avez aucune prestation pour le moment.</p>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prestation in prestations %}
+                    <tr>
+                        <td>{{ prestation.date|date('d/m/Y H:i') }}</td>
+                        <td>{{ prestation.type }}</td>
+                        <td>{{ prestation.statut }}</td>
+                        <td>
+                            {% if prestation.date|date('U') > ("+48 hours"|date('U')) %}
+                                <form method="post" action="{{ path('patient_annuler_prestation', {'id': prestation.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette prestation?');">
+                                    <button class="btn btn-danger">Annuler</button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted">Annulation impossible</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

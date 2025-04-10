@@ -1,0 +1,38 @@
+{# templates/patient/consultations.html.twig #}
+{% extends 'patient/dashboard.html.twig' %}
+
+{% block content %}
+    <h2>Mes Consultations</h2>
+    
+    {% if consultations is empty %}
+        <p>Vous n'avez aucune consultation pour le moment.</p>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Médecin</th>
+    
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consultation in consultations %}
+                    <tr>
+                        <td>{{ consultation.date|date('d/m/Y H:i') }}</td>
+                        <td>{{ consultation.medecin.nom ?? 'Non assigné' }}</td>
+                            <td>
+                            {% if consultation.date|date('U') > ("+48 hours"|date('U')) %}
+                                <form method="post" action="{{ path('patient_annuler_consultation', {'id': consultation.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette consultation?');">
+                                    <button class="btn btn-danger">Annuler</button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted">Annulation impossible</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

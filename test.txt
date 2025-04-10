@@ -1,0 +1,353 @@
+// User 
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+#[ORM\Entity]
+#[ORM\InheritanceType("JOINED")]
+#[ORM\DiscriminatorColumn(name: "type", type: "string")]
+#[ORM\DiscriminatorMap([
+    "patient" => Patient::class,
+    "medecin" => Medecin::class,
+    "secretaire" => Secretaire::class,
+    "responsable" => ResponsablePrestation::class,
+])]
+abstract class User implements UserInterface
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    protected ?int $id = null;
+
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    protected string $email;
+
+    #[ORM\Column(type: 'json')]
+    protected array $roles = [];
+
+    #[ORM\Column(type: 'string')]
+    protected string $password;
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+
+    public function eraseCredentials(): void {}
+}
+
+//Patient
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+
+#[ORM\Entity]
+class Patient extends User
+{
+    #[ORM\Column(type: 'string')]
+    private string $nom;
+
+    #[ORM\Column(type: 'string')]
+    private string $prenom;
+
+    #[ORM\Column(type: 'string', unique: true)]
+    private string $code;
+
+    #[ORM\Column(type: 'json')]
+    private array $antecedentsMedicaux = [];
+
+    #[ORM\OneToMany(mappedBy: 'patient', targetEntity: Consultation::class)]
+    private $consultations;
+
+    #[ORM\OneToMany(mappedBy: 'patient', targetEntity: Prestation::class)]
+    private $prestations;
+
+    #[ORM\OneToMany(mappedBy: 'patient', targetEntity: RendezVous::class)]
+    private $rendezVous;
+
+    public function __construct()
+    {
+        $this->consultations = new ArrayCollection();
+        $this->prestations = new ArrayCollection();
+        $this->rendezVous = new ArrayCollection();
+    }
+}
+
+//Medcin
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+
+#[ORM\Entity]
+class Medecin extends User
+{
+    #[ORM\Column(type: 'string')]
+    private string $nom;
+
+    #[ORM\Column(type: 'string')]
+    private string $prenom;
+
+    #[ORM\Column(type: 'string')]
+    private string $specialite;
+
+    #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: Consultation::class)]
+    private $consultations;
+
+    #[ORM\OneToMany(mappedBy: 'medecin', targetEntity: RendezVous::class)]
+    private $rendezVous;
+
+    public function __construct()
+    {
+        $this->consultations = new ArrayCollection();
+        $this->rendezVous = new ArrayCollection();
+    }
+}
+
+
+//Secretaire
+
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class Secretaire extends User
+{
+    #[ORM\Column(type: 'string')]
+    private string $nom;
+
+    #[ORM\Column(type: 'string')]
+    private string $prenom;
+}
+
+// ResponsablePrestation
+
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class ResponsablePrestation extends User
+{
+    #[ORM\Column(type: 'string')]
+    private string $nom;
+
+    #[ORM\Column(type: 'string')]
+    private string $prenom;
+}
+
+//Consultation
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+
+#[ORM\Entity]
+class Consultation
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\Column(type: 'datetime')]
+    private \DateTimeInterface $date;
+
+    #[ORM\Column(type: 'json')]
+    private array $constantes = []; // Ex: température, tension...
+
+    #[ORM\Column(type: 'string')]
+    private string $statut;
+
+    #[ORM\ManyToOne(targetEntity: Patient::class, inversedBy: 'consultations')]
+    private Patient $patient;
+
+    #[ORM\ManyToOne(targetEntity: Medecin::class, inversedBy: 'consultations')]
+    private Medecin $medecin;
+
+    #[ORM\OneToOne(mappedBy: 'consultation', targetEntity: Ordonnance::class, cascade: ['persist', 'remove'])]
+    private ?Ordonnance $ordonnance = null;
+
+    #[ORM\ManyToMany(targetEntity: Prestation::class)]
+    #[ORM\JoinTable(name: 'consultation_prestation')]
+    private $prestations;
+
+    public function __construct()
+    {
+        $this->prestations = new ArrayCollection();
+    }
+}
+//Prestation
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class Prestation
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\Column(type: 'string')]
+    private string $type;
+
+    #[ORM\Column(type: 'datetime')]
+    private \DateTimeInterface $date;
+
+    #[ORM\Column(type: 'string')]
+    private string $statut;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $resultats = null;
+
+    #[ORM\ManyToOne(targetEntity: Patient::class, inversedBy: 'prestations')]
+    private Patient $patient;
+}
+
+
+//RendezVous
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class RendezVous
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\Column(type: 'datetime')]
+    private \DateTimeInterface $date;
+
+    #[ORM\Column(type: 'string')]
+    private string $type; // consultation ou prestation
+
+    #[ORM\Column(type: 'string')]
+    private string $statut;
+
+    #[ORM\ManyToOne(targetEntity: Patient::class, inversedBy: 'rendezVous')]
+    private Patient $patient;
+
+    #[ORM\ManyToOne(targetEntity: Medecin::class, inversedBy: 'rendezVous')]
+    private ?Medecin $medecin = null;
+
+    #[ORM\ManyToOne(targetEntity: Prestation::class)]
+    private ?Prestation $prestation = null;
+}
+
+//Ordonnance
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+
+#[ORM\Entity]
+class Ordonnance
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\OneToOne(inversedBy: 'ordonnance', targetEntity: Consultation::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private Consultation $consultation;
+
+    #[ORM\OneToMany(mappedBy: 'ordonnance', targetEntity: OrdonnanceMedicament::class, cascade: ['persist', 'remove'])]
+    private $medicaments;
+
+    public function __construct()
+    {
+        $this->medicaments = new ArrayCollection();
+    }
+}
+
+//Medicament
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class Medicament
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\Column(type: 'string', unique: true)]
+    private string $code;
+
+    #[ORM\Column(type: 'string')]
+    private string $nom;
+}
+
+//OrdonnanceMedicament
+<?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+class OrdonnanceMedicament
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\ManyToOne(targetEntity: Ordonnance::class, inversedBy: 'medicaments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private Ordonnance $ordonnance;
+
+    #[ORM\ManyToOne(targetEntity: Medicament::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private Medicament $medicament;
+
+    #[ORM\Column(type: 'string')]
+    private string $posologie;
+}

@@ -1,0 +1,143 @@
+{# templates/patient/demande_rendezvous.html.twig #}
+{% extends 'patient/dashboard.html.twig' %}
+
+{% block title %}Clinique 221 - Demande de Rendez-vous{% endblock %}
+
+{% block content %}
+    <h2>Demande de Rendez-vous</h2>
+    
+    <div class="form-container">
+        {{ form_start(form, {'attr': {'class': 'demande-rv-form'}}) }}
+            <div class="form-group">
+                {{ form_label(form.date) }}
+                {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.date) }}
+            </div>
+            
+            <div class="form-group">
+                {{ form_label(form.type) }}
+                {{ form_widget(form.type, {'attr': {'class': 'form-control type-select'}}) }}
+                {{ form_errors(form.type) }}
+            </div>
+            
+            <div class="form-group medecin-field">
+                {{ form_label(form.medecin) }}
+                {{ form_widget(form.medecin, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.medecin) }}
+            </div>
+            
+            <div class="form-group prestation-field" style="display: none;">
+                {{ form_label(form.prestation) }}
+                {{ form_widget(form.prestation, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.prestation) }}
+                <small class="form-text">La sélection d'une prestation est obligatoire si vous choisissez le type "prestation".</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn">Envoyer la demande</button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+    
+    <div class="info-box">
+        <h3>À noter :</h3>
+        <ul>
+            <li>Votre demande sera traitée dans les meilleurs délais</li>
+            <li>Vous recevrez une confirmation par votre médecin</li>
+            <li>Délai minimum de 48h pour un rendez-vous standard</li>
+            <li>Toute annulation doit être effectuée au moins 48h à l'avance</li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const typeSelect = document.querySelector('.type-select');
+            const prestationField = document.querySelector('.prestation-field');
+            const medecinField = document.querySelector('.medecin-field');
+            
+            // Fonction pour gérer l'affichage des champs en fonction du type
+            function toggleFields() {
+                if (typeSelect.value === 'prestation') {
+                    prestationField.style.display = 'block';
+                    medecinField.style.display = 'none';
+                } else {
+                    prestationField.style.display = 'none';
+                    medecinField.style.display = 'block';
+                }
+            }
+            
+            // Initialisation
+            toggleFields();
+            
+            // Écouteur d'événement pour le changement de type
+            typeSelect.addEventListener('change', toggleFields);
+        });
+    </script>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .form-actions {
+            margin-top: 20px;
+        }
+        
+        .info-box {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-box ul {
+            padding-left: 20px;
+        }
+        
+        .form-errors {
+            color: #f44336;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .form-text {
+            color: #666;
+            font-size: 0.9em;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .alert-error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+    </style>
+{% endblock %}
